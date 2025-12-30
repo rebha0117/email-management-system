@@ -37,7 +37,7 @@ Tracks current send status (pending, sending, sent, etc.)
 
 Acts as the source of truth for send eligibility
 
-3. Sender Service (Python)
+### 3. Sender Service (Python)
 
 Runs as a scheduled batch job (weekly campaign execution)
 
@@ -65,7 +65,7 @@ Responsibility of Sender Service:
 Apply business rules, batching, and rate control.
 It does not handle delivery, bounce, or complaint logic.
 
-4. AWS SES
+### 4. AWS SES
 
 Handles bulk email delivery
 
@@ -87,13 +87,13 @@ Sender reputation management
 
 SES is responsible only for email delivery mechanics, not business logic.
 
-5. AWS SNS
+### 5. AWS SNS
 
 Receives email feedback events from SES
 
 Fans out delivery, bounce, and complaint notifications to subscribers
 
-6. AWS Lambda (Event Processor)
+### 6. AWS Lambda (Event Processor)
 
 Consumes SNS events
 
@@ -109,7 +109,7 @@ Writes immutable email event records to Redshift
 
 Emits logs and metrics to CloudWatch
 
-7. Redshift (Analytics Warehouse)
+### 7. Redshift (Analytics Warehouse)
 
 Stores historical email events (delivery, bounce, complaint, engagement)
 
@@ -117,7 +117,7 @@ Supports reporting and trend analysis
 
 Not used for operational decision-making
 
-8. CloudWatch
+### 8. CloudWatch
 
 Collects logs from Lambda and sender execution
 
@@ -125,12 +125,12 @@ Monitors failures and execution metrics
 
 Supports alerting on error rates and anomalies
 
-9. Unsubscribe Flow
+### 9. Unsubscribe Flow
 
-User clicks unsubscribe link embedded in email
+- User clicks unsubscribe link embedded in email
 
-Request handled via API Gateway / Lambda
+- Request handled via API Gateway / Lambda
 
-Email address added to suppression list in Postgres
+- Email address added to suppression list in Postgres
 
-Future sends to this address are blocked immediately
+- Future sends to this address are blocked immediately
