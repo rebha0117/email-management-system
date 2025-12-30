@@ -3,8 +3,8 @@
 # Email Management System
 
 This project documents the architecture and data model for an
-email management system used to send weekly sailing announcements
-to customers (~70k emails/week).
+email management system used to send weekly sailing announcements, freight rates among others
+to customers (~70k+ emails/week).
 
 ## Goals
 - Reliable bulk email sending via AWS SES
