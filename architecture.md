@@ -48,7 +48,10 @@ Marks recipients as sending to prevent duplicate sends
 Selects SES template based on week-of-month
 
 Supplies customer-specific template data
-(pulls data from Postgres and builds a JSON payload)
+
+Pulls data from Postgres
+
+Builds a JSON payload
 
 Sends emails via SES using rate-limited batch sending
 
@@ -58,8 +61,9 @@ Batch size and send rate are configurable
 
 Records SES message IDs and updates send status to sent or failed
 
-The Sender Service applies business rules, batching, and rate control.
-It does not handle delivery or bounce logic.
+Responsibility of Sender Service:
+Apply business rules, batching, and rate control.
+It does not handle delivery, bounce, or complaint logic.
 
 4. AWS SES
 
@@ -67,7 +71,9 @@ Handles bulk email delivery
 
 Applies email templates
 
-Manages:
+Emits delivery, bounce, and complaint events
+
+Responsibilities of AWS SES:
 
 SMTP connections
 
@@ -77,9 +83,7 @@ ISP and mailbox provider rules
 
 Throttling enforcement
 
-Sender reputation
-
-Emits delivery, bounce, and complaint events
+Sender reputation management
 
 SES is responsible only for email delivery mechanics, not business logic.
 
@@ -97,7 +101,7 @@ Parses delivery, bounce, and complaint payloads
 
 Updates:
 
-suppression list (for unsubscribe, complaint, hard bounce)
+suppression list (unsubscribe, complaint, hard bounce)
 
 recipient status in Postgres
 
