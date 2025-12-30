@@ -3,7 +3,7 @@
 # Email Management System
 
 This project documents the architecture and data model for an
-email management system used to send weekly sailing announcements, freight rates among others
+email management system used to send weekly sailing announcements, freight rates etc.
 to customers (~70k+ emails/week).
 
 ## Goals
