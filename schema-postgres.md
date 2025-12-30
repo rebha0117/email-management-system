@@ -1,11 +1,3 @@
-# Postgres Schema – Email Management System
-
-This document defines the **operational database schema** used to
-control email sending, compliance, and system state.
-
-## Entity Relationship Diagram (ERD)
-
-```mermaid
 erDiagram
   CUSTOMERS {
     uuid customer_id PK
@@ -41,12 +33,22 @@ erDiagram
   CAMPAIGN_RECIPIENTS {
     uuid campaign_id PK, FK
     uuid customer_id PK, FK
-    text email
-    text recipient_status "pending|sent|failed|suppressed|bounced|complained|unsubscribed"
+    text email "optional cached copy"
+    text recipient_status "pending|sending|sent|failed|suppressed|bounced|complained|unsubscribed"
+
     text ses_message_id
-    timestamptz last_attempt_at
     int attempt_count
-    jsonb template_data
+    timestamptz last_attempt_at
+
+    timestamptz sending_started_at
+    timestamptz sent_at
+    timestamptz delivered_at
+    timestamptz bounced_at
+    timestamptz complained_at
+    timestamptz unsubscribed_at
+    text last_event_type "delivery|bounce|complaint|open|click|unsubscribe"
+
+    jsonb template_data "weekly customer-specific sailings/rates snapshot"
     timestamptz created_at
     timestamptz updated_at
   }
@@ -82,15 +84,6 @@ erDiagram
 
   CUSTOMERS ||--o{ CAMPAIGN_RECIPIENTS : "customer_id"
   CAMPAIGNS ||--o{ CAMPAIGN_RECIPIENTS : "campaign_id"
+  CAMPAIGNS ||--o{ UNSUBSCRIBE_TOKENS : "campaign_id"
   CAMPAIGNS ||--o{ EMAIL_EVENTS_OP : "campaign_id"
   CUSTOMERS ||--o{ EMAIL_EVENTS_OP : "customer_id"
-```
-
-## Design Notes
-
-- **campaign_recipients** uses a composite primary key
-  (`campaign_id`, `customer_id`) to prevent duplicate sends.
-- **suppression_list** is the authoritative source for compliance.
-- **email_events_op** stores recent operational events for
-  troubleshooting and support use cases.
-- Full historical analytics are stored in Redshift.
