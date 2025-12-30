@@ -47,8 +47,8 @@ flowchart LR
 - Records SES message IDs and updates send status to sent or failed
 
   #### Responsibility of Sender Service:
-- Apply business rules, batching, and rate control.
-- It does not handle delivery, bounce, or complaint logic.
+- Apply business rules, batching, and rate control
+- It does not handle delivery, bounce, or complaint logic
 
 ### 4. AWS SES
 
@@ -61,8 +61,7 @@ flowchart LR
 ### 5. AWS SNS
 
 - Receives email feedback events from SES
-- Broadcasts delivery, bounce, and complaint events to downstream services
-  (e.g., Lambda functions)
+- Broadcasts delivery, bounce, and complaint events to downstream services (e.g., Lambda functions)
 
 ### 6. AWS Lambda (Event Processor)
 
