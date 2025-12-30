@@ -18,53 +18,115 @@ flowchart LR
     K --> G
 ```
 
-## Component Responsibilities
+Component Responsibilities
+1. Model Output
 
-### 1. Model Output
-- Generates target customer list
-- Adds week number and generation date
-- Writes results into Postgres
+Generates target customer list
 
-### 2. Postgres (Operational Database)
-- Stores customers, campaigns, recipients
-- Maintains suppression list (unsubscribe, bounce, complaint)
-- Tracks current send status
+Adds week number and generation date
 
-### 3. Sender Service (Python)
-- Reads eligible recipients from Postgres
-- Selects SES template based on week-of-month
-- Supplies customer-specific template data (pulls that data from Postgres builds a JSON payload)
-- Sends bulk emails via SES
+Writes results into Postgres
 
-### 4. AWS SES
-- Handles bulk email delivery
-- Applies email templates
-- Emits delivery, bounce, and complaint events
+2. Postgres (Operational Database)
 
-Responsibilities of AWS SES : Handle bulk email delivery
+Stores customers, campaigns, and campaign recipients
 
-SES handles: SMTP connections, retries, ISP rules, throttling, reputation management
+Maintains suppression list (unsubscribe, bounce, complaint)
 
-### 5. AWS SNS
-- Receives SES feedback events
-- Fans out events to subscribers
+Tracks current send status (pending, sending, sent, etc.)
 
-### 6. AWS Lambda (Event Processor)
-- Consumes SNS events
-- Updates suppression list and recipient status in Postgres
-- Writes immutable email events to Redshift
+Acts as the source of truth for send eligibility
 
-### 7. Redshift (Analytics Warehouse)
-- Stores historical email events
-- Supports reporting and trend analysis
+3. Sender Service (Python)
 
-### 8. CloudWatch
-- Collects logs from Lambda
-- Monitors failures and execution metrics
+Runs as a scheduled batch job (weekly campaign execution)
 
-### 9. Unsubscribe Flow
-- User clicks unsubscribe link in email
-- API Gateway / Lambda processes request
-- Email ad
+Reads eligible recipients (status = pending) from Postgres in controlled batches
 
+Marks recipients as sending to prevent duplicate sends
 
+Selects SES template based on week-of-month
+
+Supplies customer-specific template data
+(pulls data from Postgres and builds a JSON payload)
+
+Sends emails via SES using rate-limited batch sending
+
+Throttle applied to respect SES sending limits
+
+Batch size and send rate are configurable
+
+Records SES message IDs and updates send status to sent or failed
+
+The Sender Service applies business rules, batching, and rate control.
+It does not handle delivery or bounce logic.
+
+4. AWS SES
+
+Handles bulk email delivery
+
+Applies email templates
+
+Manages:
+
+SMTP connections
+
+Automatic retries
+
+ISP and mailbox provider rules
+
+Throttling enforcement
+
+Sender reputation
+
+Emits delivery, bounce, and complaint events
+
+SES is responsible only for email delivery mechanics, not business logic.
+
+5. AWS SNS
+
+Receives email feedback events from SES
+
+Fans out delivery, bounce, and complaint notifications to subscribers
+
+6. AWS Lambda (Event Processor)
+
+Consumes SNS events
+
+Parses delivery, bounce, and complaint payloads
+
+Updates:
+
+suppression list (for unsubscribe, complaint, hard bounce)
+
+recipient status in Postgres
+
+Writes immutable email event records to Redshift
+
+Emits logs and metrics to CloudWatch
+
+7. Redshift (Analytics Warehouse)
+
+Stores historical email events (delivery, bounce, complaint, engagement)
+
+Supports reporting and trend analysis
+
+Not used for operational decision-making
+
+8. CloudWatch
+
+Collects logs from Lambda and sender execution
+
+Monitors failures and execution metrics
+
+Supports alerting on error rates and anomalies
+
+9. Unsubscribe Flow
+
+User clicks unsubscribe link embedded in email
+
+Request handled via API Gateway / Lambda
+
+Email address added to suppression list in Postgres
+
+Future sends to this address are blocked immediately
