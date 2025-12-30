@@ -22,9 +22,7 @@ flowchart LR
 ### 1. Model Output
 
 - Generates target customer list
-
 - Adds week number and generation date
-
 - Writes results into Postgres
 
 ### 2. Postgres (Operational Database)
@@ -61,7 +59,7 @@ flowchart LR
 
 - Records SES message IDs and updates send status to sent or failed
 
-- Responsibility of Sender Service:
+  #### Responsibility of Sender Service:
 - Apply business rules, batching, and rate control.
 - It does not handle delivery, bounce, or complaint logic.
 
@@ -81,7 +79,8 @@ flowchart LR
 
 - Receives email feedback events from SES
 
-- Fans out delivery, bounce, and complaint notifications to subscribers
+- Broadcasts delivery, bounce, and complaint events to downstream services
+  (e.g., Lambda functions)
 
 ### 6. AWS Lambda (Event Processor)
 
