@@ -33,13 +33,17 @@ flowchart LR
 ### 3. Sender Service (Python)
 - Reads eligible recipients from Postgres
 - Selects SES template based on week-of-month
-- Supplies customer-specific template data
+- Supplies customer-specific template data (pulls that data from Postgres builds a JSON payload)
 - Sends bulk emails via SES
 
 ### 4. AWS SES
 - Handles bulk email delivery
 - Applies email templates
 - Emits delivery, bounce, and complaint events
+
+Responsibilities of AWS SES : Handle bulk email delivery
+
+SES handles: SMTP connections, retries, ISP rules, throttling, reputation management
 
 ### 5. AWS SNS
 - Receives SES feedback events
