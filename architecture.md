@@ -18,8 +18,8 @@ flowchart LR
     K --> G
 ```
 
-Component Responsibilities
-1. Model Output
+## Component Responsibilities
+### 1. Model Output
 
 Generates target customer list
 
@@ -27,7 +27,7 @@ Adds week number and generation date
 
 Writes results into Postgres
 
-2. Postgres (Operational Database)
+### 2. Postgres (Operational Database)
 
 Stores customers, campaigns, and campaign recipients
 
