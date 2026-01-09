@@ -1,105 +1,115 @@
 ```mermaid
 erDiagram
   CONTACTS {
-    string contact_id PK
-    string account_id
-    string primary_email
-    string country_code
+    uuid contact_id PK
+    uuid account_id
+    text primary_email
+    text country_code
     boolean is_active
-    datetime created_at
+    timestamptz created_at
   }
 
   ACCOUNTS {
-    string account_id PK
-    string account_name
-    string country_code
+    uuid account_id PK
+    text account_name
+    text country_code
     boolean is_active
-    datetime created_at
+    timestamptz created_at
   }
 
   CAMPAIGNS {
-    string campaign_id PK
-    string name
+    uuid campaign_id PK
+    text name
     boolean is_active
-    datetime created_at
-  }
-
-  CAMPAIGN_RUNS {
-    string campaign_run_id PK
-    string campaign_id
-    date run_date
-    int week_of_month
-    string model_run_id
-    string template_version_id
-    string status
-    datetime created_at
-  }
-
-  CAMPAIGN_RUN_CONTEXT {
-    string campaign_run_id PK
-    string context_checksum
-    datetime fetched_at
-    string source
-    string context_json
+    timestamptz created_at
   }
 
   MODEL_RUNS {
-    string model_run_id PK
+    uuid model_run_id PK
     date scoring_week
-    string model_version
-    string s3_uri
-    datetime created_at
+    text model_version
+    text s3_uri
+    timestamptz created_at
   }
 
   TEMPLATES {
-    string template_id PK
-    string name
+    uuid template_id PK
+    text name
     boolean is_active
-    datetime created_at
+    timestamptz created_at
   }
 
   TEMPLATE_VERSIONS {
-    string template_version_id PK
-    string template_id
+    uuid template_version_id PK
+    uuid template_id
     int version_number
-    datetime created_at
+    text subject_template
+    text html_template
+    text text_template
+    timestamptz created_at
+  }
+
+  CAMPAIGN_RUNS {
+    uuid campaign_run_id PK
+    uuid campaign_id
+    date run_date
+    int week_of_month
+    uuid model_run_id
+    uuid template_version_id
+    text status
+    timestamptz created_at
+  }
+
+  CAMPAIGN_RUN_CONTEXT {
+    uuid campaign_run_id PK
+    jsonb context_json
+    text context_checksum
+    text source
+    timestamptz fetched_at
   }
 
   MESSAGES {
-    string message_id PK
-    string campaign_run_id
-    string contact_id
-    string account_id
-    string to_email
-    string current_status
-    datetime queued_at
-    datetime sent_at
-    datetime last_event_at
+    uuid message_id PK
+    uuid campaign_run_id
+    uuid contact_id
+    uuid account_id
+    text to_email
+    text current_status
+    jsonb render_context_json
+    text rendered_subject
+    text rendered_html
+    text rendered_text
+    timestamptz queued_at
+    timestamptz sent_at
+    timestamptz last_event_at
   }
 
   SEND_ATTEMPTS {
-    string attempt_id PK
-    string message_id
-    string ses_message_id
-    string attempt_status
-    datetime attempted_at
+    uuid attempt_id PK
+    uuid message_id
+    text idempotency_key
+    text ses_message_id
+    text attempt_status
+    timestamptz attempted_at
   }
 
   MESSAGE_EVENTS {
-    string event_id PK
-    string message_id
-    string ses_message_id
-    string event_type
-    datetime event_ts
-    datetime ingested_at
+    uuid event_id PK
+    uuid message_id
+    text ses_message_id
+    text event_type
+    jsonb raw_payload
+    timestamptz event_ts
+    timestamptz ingested_at
   }
 
   SUPPRESSIONS {
-    string suppression_id PK
-    string scope_type
-    string scope_value
-    string reason
-    datetime created_at
+    uuid suppression_id PK
+    text scope_type
+    text scope_value
+    text reason
+    text source
+    timestamptz created_at
   }
 
   ACCOUNTS ||--o{ CONTACTS : has
@@ -107,8 +117,8 @@ erDiagram
   MODEL_RUNS ||--o{ CAMPAIGN_RUNS : uses
   TEMPLATES ||--o{ TEMPLATE_VERSIONS : versions
   TEMPLATE_VERSIONS ||--o{ CAMPAIGN_RUNS : applied
+  CAMPAIGN_RUNS ||--|| CAMPAIGN_RUN_CONTEXT : has
   CAMPAIGN_RUNS ||--o{ MESSAGES : creates
   CONTACTS ||--o{ MESSAGES : receives
   MESSAGES ||--o{ SEND_ATTEMPTS : attempts
   MESSAGES ||--o{ MESSAGE_EVENTS : events
-  CAMPAIGN_RUNS ||--|| CAMPAIGN_RUN_CONTEXT : has
