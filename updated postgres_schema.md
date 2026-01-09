@@ -1,4 +1,3 @@
-```mermaid
 erDiagram
   CONTACTS {
     string contact_id PK
@@ -33,6 +32,14 @@ erDiagram
     string template_version_id
     string status
     datetime created_at
+  }
+
+  CAMPAIGN_RUN_CONTEXT {
+    string campaign_run_id PK
+    string context_checksum
+    datetime fetched_at
+    string source
+    string context_json
   }
 
   MODEL_RUNS {
@@ -103,4 +110,4 @@ erDiagram
   CONTACTS ||--o{ MESSAGES : receives
   MESSAGES ||--o{ SEND_ATTEMPTS : attempts
   MESSAGES ||--o{ MESSAGE_EVENTS : events
-
+  CAMPAIGN_RUNS ||--|| CAMPAIGN_RUN_CONTEXT : has
