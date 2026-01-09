@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
   CONTACTS {
     string contact_id PK
